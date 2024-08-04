@@ -143,7 +143,7 @@ def edf():
     response = {
         "turnaround" : turn_medio
     }
-    return response
+    return jsonify(response)
 
 @app.route('/rr/submit', methods=['POST'])
 def round_r():
@@ -220,7 +220,7 @@ def round_r():
     response = {
         "turnaround" : turn_medio
     }
-    return response 
+    return jsonify(response)
 
 
 
