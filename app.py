@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 
-@app.route('/fifo', methods=['POST', 'GET'])
+@app.route('/fifo', methods=['POST'])
 def fifo():
     lista_processos = request.json[:-1]
     # lista_processos = request.json
@@ -23,20 +23,13 @@ def fifo():
     maior = max(lista_turnarounds)
 
 
-    if request.method == 'GET':
-        valor = request.args.get('var')
-        if valor == 'maior':
-            return maior
-        elif valor == 'turn':
-            return turn_medio
-        else:
-            return "NULL"
+    return [maior, turn_medio]
     
     
 
 
 
-@app.route('/sjf', methods=['POST', 'GET'])
+@app.route('/sjf', methods=['POST'])
 def sjf():
         lista_processos = request.json[:-1]
         tempo_atual = turn_total = i = 0
@@ -69,16 +62,9 @@ def sjf():
         
         turn_medio = turn_total / len(lista_processos)
         maior = max(lista_turnarounds)
-        if request.method == 'GET':
-            valor = request.args.get('var')
-            if valor == 'maior':
-                return maior
-            elif valor == 'turn':
-                return turn_medio
-            else:
-                return "NULL"
+        return [maior, turn_medio]
 
-@app.route('/edf', methods=['POST', 'GET'])
+@app.route('/edf', methods=['POST'])
 def edf():
 
     lista_processos = request.json
@@ -164,19 +150,12 @@ def edf():
 
     turn_medio = float(turnaround/qtd_processos)
     maior = max(lista_de_turnarounds) 
-    if request.method == 'GET':
-        valor = request.args.get('var')
-        if valor == 'maior':
-            return maior
-        elif valor == 'turn':
-            return turn_medio
-        else:
-            return "NULL"
+    return [maior, turn_medio]
 
 
 
-@app.route('/rr', methods=['POST', 'GET'])
-def round_r():
+@app.route('/rr', methods=['POST'])
+def rr():
     lista_processos = request.json
     
     lista_tempo_chegada = [] 
@@ -252,14 +231,8 @@ def round_r():
 
     maior = max(lista_de_turnarounds)
     turn_medio = float(turnaround/qtd_processos)
-    if request.method == 'GET':
-        valor = request.args.get('var')
-        if valor == 'maior':
-            return maior
-        elif valor == 'turn':
-            return turn_medio
-        else:
-            return "NULL"
+
+    return [maior, turn_medio]
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
