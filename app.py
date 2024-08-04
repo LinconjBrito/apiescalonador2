@@ -23,7 +23,10 @@ def fifo():
     maior = max(lista_turnarounds)
 
 
-    return [maior, turn_medio]
+    return {
+        "maior": maior,
+        "turnaround": turn_medio
+    }
     
     
 
@@ -62,7 +65,10 @@ def sjf():
         
         turn_medio = turn_total / len(lista_processos)
         maior = max(lista_turnarounds)
-        return [maior, turn_medio]
+        return {
+            "maior": maior,
+            "turnaround": turn_medio
+        }
 
 @app.route('/edf/submit', methods=['POST'])
 def edf():
@@ -150,7 +156,10 @@ def edf():
 
     turn_medio = float(turnaround/qtd_processos)
     maior = max(lista_de_turnarounds) 
-    return [maior, turn_medio]
+    return {
+        "maior": maior,
+        "turnaround": turn_medio
+    }
 
 
 
@@ -232,7 +241,10 @@ def rr():
     maior = max(lista_de_turnarounds)
     turn_medio = float(turnaround/qtd_processos)
 
-    return [maior, turn_medio]
+    return {
+        "maior": maior,
+        "turnaround": turn_medio
+    }
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
