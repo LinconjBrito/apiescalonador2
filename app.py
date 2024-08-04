@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 
-@app.route('/fifo', methods=['POST'])
+@app.route('/fifo/submit', methods=['POST'])
 def fifo():
     lista_processos = request.json[:-1]
     # lista_processos = request.json
@@ -29,7 +29,7 @@ def fifo():
 
 
 
-@app.route('/sjf', methods=['POST'])
+@app.route('/sjf/submit', methods=['POST'])
 def sjf():
         lista_processos = request.json[:-1]
         tempo_atual = turn_total = i = 0
@@ -64,7 +64,7 @@ def sjf():
         maior = max(lista_turnarounds)
         return [maior, turn_medio]
 
-@app.route('/edf', methods=['POST'])
+@app.route('/edf/submit', methods=['POST'])
 def edf():
 
     lista_processos = request.json
@@ -154,7 +154,7 @@ def edf():
 
 
 
-@app.route('/rr', methods=['POST'])
+@app.route('/rr/submit', methods=['POST'])
 def rr():
     lista_processos = request.json
     
