@@ -19,7 +19,7 @@ def fifo():
         v['Turnaround'] = v['Termino'] - v["T_chegada"]
         lista_turnarounds[k] += v['Turnaround']
         turn_total += v['Turnaround']
-    turn_medio = turn_total / len(lista_ordenada_tempo_chegada)
+    turn_medio = float(turn_total / len(lista_ordenada_tempo_chegada) * 10)/10.0
     maior = max(lista_turnarounds)
 
 
@@ -63,8 +63,9 @@ def sjf():
             i += 1
             turn_total += processo['Turnaround']
         
-        turn_medio = turn_total / len(lista_processos)
+        turn_medio = float(turn_total / len(lista_processos) * 10)/10.0
         maior = max(lista_turnarounds)
+
         return {
             "maior": maior,
             "turnaround": turn_medio
@@ -155,6 +156,7 @@ def edf():
             turnaround+=tempo_edf-lista_tempo_chegada[p]
 
     turn_medio = float(turnaround/qtd_processos)
+    turn_medio = float(turnaround/qtd_processos * 10) / 10.0
     maior = max(lista_de_turnarounds) 
     return {
         "maior": maior,
@@ -239,7 +241,7 @@ def rr():
             verificaFila()
 
     maior = max(lista_de_turnarounds)
-    turn_medio = float(turnaround/qtd_processos * 100) / 10.0
+    turn_medio = float(turnaround/qtd_processos * 10) / 10.0
 
     return {
         "maior": maior,
