@@ -239,7 +239,7 @@ def rr():
             verificaFila()
 
     maior = max(lista_de_turnarounds)
-    turn_medio = float(turnaround/qtd_processos * 100) / 100
+    turn_medio = float(turnaround/qtd_processos * 100) / 10.0
 
     return {
         "maior": maior,
