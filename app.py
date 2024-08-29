@@ -114,6 +114,7 @@ def edf():
     lista_tempo_chegada = [] 
     lista_tempo_execucao = []
     lista_deadlines = []
+    lista_parametros_deadlines = []
 
      
     for k, v in enumerate(lista_processos):
@@ -126,7 +127,9 @@ def edf():
 
         if 'Deadline' in v:
             lista_deadlines.append(v['Deadline'])
-
+        
+        if 'Deadline' in v:
+            lista_parametros_deadlines.append(v['Deadline'])
         # setando os valores do sistema
         if 'quantum' in v:
             quantum = v['quantum']
@@ -141,7 +144,11 @@ def edf():
     tempo_edf = int(min(lista_tempo_chegada))
     turnaround = 0
     tempo_cpu = [0]*qtd_processos  
-    lista_processamento = [0]*qtd_processos  
+    lista_processamento = [0]*qtd_processos 
+    grafico = []
+    for i in range(qtd_processos):
+        linha = []
+        grafico.append(linha) 
 
     def verificaFila():
         for x in range(0,qtd_processos):
@@ -151,50 +158,115 @@ def edf():
     verificaFila()
     def firstKill():
         deadline_proxima = 1000
+        global escolhido
         escolhido = -1
         for x in range(0,qtd_processos):
             if lista_processamento[x] == 1 and lista_deadlines[x] < deadline_proxima and tempo_cpu[x] < lista_tempo_execucao[x]:
                 deadline_proxima = lista_deadlines[x]
                 escolhido = x
+            pass
         for x in range(0,qtd_processos):
             if escolhido == -1 and lista_processamento[x] == 0:
                 deadline_proxima = lista_deadlines[x]
                 escolhido = x
                 global tempo_edf
                 tempo_edf = lista_tempo_chegada[x]
+            pass
         return escolhido
-
-    verificaFila()        
+       
     while firstKill() != -1:
-        p = firstKill()
-        resta_executar = lista_tempo_execucao[p]-tempo_cpu[p] 
+        resta_executar = lista_tempo_execucao[escolhido]-tempo_cpu[escolhido] 
         if resta_executar > quantum:
             tempo_edf+=quantum
-            lista_deadlines[p] -= quantum
-            verificaFila()
-            tempo_cpu[p]+=quantum 
-            tempo_edf+=sobrecarga
-            lista_deadlines[p] -= quantum
-            verificaFila()
-        elif resta_executar == quantum and resta_executar > 0: 
-            tempo_edf+=quantum
-            lista_de_turnarounds[p]+=tempo_edf-lista_tempo_chegada[p]
-            lista_deadlines[p] -= quantum
+            tempo_cpu[escolhido] += quantum
+            for x in range(0,qtd_processos):
+                if lista_tempo_chegada[x] <= tempo_edf and tempo_cpu[x]<lista_tempo_execucao[x]:
+                    lista_deadlines[x] = lista_parametros_deadlines[x] - tempo_edf
+            for p in range(qtd_processos):
+                if p == escolhido:
+                    for i in range(int(quantum)):
+                        if lista_deadlines[p] >= 0:
+                            grafico[p].append(1)
+                        else:
+                            grafico[p].append(8)
+                else:
+                    if lista_tempo_chegada[p] < tempo_edf and tempo_cpu[p]!=lista_tempo_execucao[p]:
+                        if (tempo_edf - lista_tempo_chegada[p]) == tempo_edf and grafico[p] == []:
+                            for i in range(int(quantum)):
+                                grafico[p].append(0)
+                        elif (tempo_edf - lista_tempo_chegada[p]) < tempo_edf and grafico[p] == []:
+                            for i in range(int(lista_tempo_chegada[p])):
+                                grafico[p].append(9)
+                            for i in range(int(quantum-lista_tempo_chegada[p])):
+                                grafico[p].append(0)
+                        else:
+                            for i in range(int(quantum)):
+                                grafico[p].append(0)
+                    elif lista_tempo_chegada[p]<= tempo_edf and tempo_cpu[p]==lista_tempo_execucao[p]:
+                        for i in range(int(quantum)):
+                            grafico[p].append(9)
+                    elif lista_tempo_chegada[p] > tempo_edf:
+                        for i in range(int(quantum)):
+                            grafico[p].append(9)
+                    elif lista_tempo_chegada[p] == tempo_edf and tempo_cpu[p]!=lista_tempo_execucao[p]:
+                        for i in range(int(quantum)):
+                            grafico[p].append(9)   
             verificaFila() 
-            tempo_cpu[p]+=quantum 
-            turnaround+=tempo_edf-lista_tempo_chegada[p] 
-        elif resta_executar < quantum:
-            tempo_edf+= resta_executar
-            lista_de_turnarounds[p]+=tempo_edf-lista_tempo_chegada[p]
-            lista_deadlines[p] -= resta_executar
+            tempo_edf+=sobrecarga
+            for x in range(0,qtd_processos): 
+                if lista_tempo_chegada[x] <= tempo_edf and tempo_cpu[x]<lista_tempo_execucao[x]: 
+                    lista_deadlines[x] = lista_parametros_deadlines[x] - tempo_edf 
+            for p in range(qtd_processos):
+                if p == escolhido:
+                    for i in range(int(sobrecarga)):
+                        grafico[p].append(3)
+                else:
+                    if lista_tempo_chegada[p]< tempo_edf and tempo_cpu[p]!=lista_tempo_execucao[p]:
+                        for i in range(int(sobrecarga)):
+                            grafico[p].append(0)
+                    elif lista_tempo_chegada[p]<= tempo_edf and tempo_cpu[p]==lista_tempo_execucao[p]:
+                        for i in range(int(sobrecarga)):
+                            grafico[p].append(9)
+                    elif lista_tempo_chegada[p] > tempo_edf:
+                        for i in range(int(sobrecarga)):
+                            grafico[p].append(9)
             verificaFila()
-            tempo_cpu[p]+=resta_executar
-            turnaround+=tempo_edf-lista_tempo_chegada[p]
+        elif resta_executar <= quantum and resta_executar > 0: 
+            tempo_edf+= resta_executar
+            for x in range(0,qtd_processos): 
+                if lista_tempo_chegada[x] <= tempo_edf and tempo_cpu[x]<lista_tempo_execucao[x]:
+                    lista_deadlines[x] = lista_parametros_deadlines[x] - tempo_edf
+            for p in range(qtd_processos):
+                if p == escolhido:
+                    if lista_deadlines[p] >= 0:
+                        for i in range(int(resta_executar)):
+                            grafico[p].append(1)
+                    else:
+                        for i in range(int(resta_executar)):
+                            grafico[p].append(8)
+                else:
+                    if lista_tempo_chegada[p]< tempo_edf and tempo_cpu[p]!=lista_tempo_execucao[p]:
+                        for i in range(int(resta_executar)):
+                            grafico[p].append(0)
+                    elif lista_tempo_chegada[p]<= tempo_edf and tempo_cpu[p]==lista_tempo_execucao[p]:
+                        for i in range(int(resta_executar)):
+                            grafico[p].append(9)
+                    elif lista_tempo_chegada[p] > tempo_edf:
+                        for i in range(int(resta_executar)):
+                            grafico[p].append(9)
+                    elif lista_tempo_chegada[p] == tempo_edf and tempo_cpu[p]!=lista_tempo_execucao[p]:
+                        for i in range(int(resta_executar)):
+                            grafico[p].append(9)  
+            lista_de_turnarounds[escolhido]+=tempo_edf-lista_tempo_chegada[escolhido]
+            verificaFila() 
+            tempo_cpu[escolhido]+=quantum 
+            turnaround+=tempo_edf-lista_tempo_chegada[escolhido] 
 
     turn_medio = float(turnaround/qtd_processos)
     turn_medio = float(turnaround/qtd_processos * 10) / 10.0
     maior = max(lista_de_turnarounds) 
     return {
+        "grafico": grafico,
         "maior": maior,
         "turnaround": turn_medio
     }
@@ -233,6 +305,10 @@ def rr():
     tempo_cpu = [0]*qtd_processos  
     lista_processamento = [0]*qtd_processos  
     lista_circular = [] 
+    grafico = []
+    for i in range(qtd_processos):
+        linha = []
+        grafico.append(linha)
 
     def verificaFila():
         global tempo_rr
@@ -253,25 +329,74 @@ def rr():
         resta_executar = lista_tempo_execucao[p]-tempo_cpu[p]  
         if resta_executar > quantum:
             tempo_rr+= quantum
-            verificaFila()
             tempo_cpu[p]+=quantum
+            for x in range(qtd_processos):
+                if x == p:
+                    for i in range(int(quantum)):
+                        grafico[x].append(1)
+                else:
+                    if lista_tempo_chegada[x] < tempo_rr and tempo_cpu[x]!=lista_tempo_execucao[x]:
+                        if (tempo_rr - lista_tempo_chegada[x]) == tempo_rr and grafico[x] == []:
+                            for i in range(int(quantum)):
+                                grafico[x].append(0)
+                        elif (tempo_rr - lista_tempo_chegada[x]) < tempo_rr and grafico[x] == []:
+                            for i in range(int(lista_tempo_chegada[x])):
+                                grafico[x].append(9)
+                            for i in range(int(quantum-lista_tempo_chegada[x])):
+                                grafico[x].append(0)
+                        else:
+                            for i in range(int(quantum)):
+                                grafico[x].append(0)   
+                    elif lista_tempo_chegada[x]<= tempo_rr and tempo_cpu[x]==lista_tempo_execucao[x]:
+                        for i in range(int(quantum)):
+                            grafico[x].append(9)
+                    elif lista_tempo_chegada[x] > tempo_rr:
+                        for i in range(int(quantum)):
+                            grafico[x].append(9)
+                    elif lista_tempo_chegada[x] == tempo_rr and tempo_cpu[x]!=lista_tempo_execucao[x]:
+                        for i in range(int(quantum)):
+                            grafico[x].append(9)
+            verificaFila()
             tempo_rr+= sobrecarga
+            for x in range(qtd_processos):
+                if x == p:
+                    for i in range(int(sobrecarga)):
+                        grafico[p].append(3)
+                else:
+                    if lista_tempo_chegada[x] < tempo_rr and tempo_cpu[x]!=lista_tempo_execucao[x]:
+                        for i in range(int(sobrecarga)):
+                            grafico[x].append(0)
+                    elif lista_tempo_chegada[x] <= tempo_rr and tempo_cpu[x]==lista_tempo_execucao[x]:
+                        for i in range(int(sobrecarga)):
+                            grafico[x].append(9)
+                    elif lista_tempo_chegada[x] > tempo_rr:
+                        for i in range(int(sobrecarga)):
+                            grafico[x].append(9)
             verificaFila()
             lista_circular.remove(p)
             lista_circular.append(p)
-        elif resta_executar == quantum and resta_executar > 0 :
-            tempo_rr+=quantum
-            lista_de_turnarounds[p]+=tempo_rr-lista_tempo_chegada[p]
-            verificaFila()
-            tempo_cpu[p]+=quantum
-            turnaround+=tempo_rr-lista_tempo_chegada[p]
-            lista_circular.remove(p)
-            verificaFila()
-        elif resta_executar < quantum:
-            tempo_rr+= resta_executar
+        elif resta_executar <= quantum and resta_executar > 0 :
+            tempo_rr+=resta_executar
             lista_de_turnarounds[p]+=tempo_rr-lista_tempo_chegada[p]
             verificaFila()
             tempo_cpu[p]+=resta_executar
+            for x in range(qtd_processos):
+                if x == p:
+                    for i in range(int(resta_executar)):
+                        grafico[p].append(1)
+                elif x != p:
+                    if lista_tempo_chegada[x]< tempo_rr and tempo_cpu[x]!=lista_tempo_execucao[x]:
+                        for i in range(int(resta_executar)):
+                            grafico[x].append(0)
+                    elif lista_tempo_chegada[x]<= tempo_rr and tempo_cpu[x]==lista_tempo_execucao[x]:
+                        for i in range(int(resta_executar)):
+                            grafico[x].append(9)
+                    elif lista_tempo_chegada[x] > tempo_rr:
+                        for i in range(int(resta_executar)):
+                            grafico[x].append(9)
+                    elif lista_tempo_chegada[x] == tempo_rr and tempo_cpu[x]!=lista_tempo_execucao[x]:
+                        for i in range(int(resta_executar)):
+                            grafico[x].append(9)    
             turnaround+=tempo_rr-lista_tempo_chegada[p]
             lista_circular.remove(p)
             verificaFila()
@@ -280,6 +405,7 @@ def rr():
     turn_medio = float(turnaround/qtd_processos * 10) / 10.0
 
     return {
+        "grafico": grafico,
         "maior": maior,
         "turnaround": turn_medio
     }
