@@ -40,6 +40,9 @@ def sjf():
         
         contador = 0
         graficogeral = []
+        for c in range(len(lista_processos)):
+            lista = []
+            graficogeral.append(lista)
 
         while processos_restantes:
             processos_disponiveis = []
@@ -59,31 +62,26 @@ def sjf():
             
             
             if contador == 0:
-                grafico = [9] * tempo_atual
+                graficogeral[processo['Id']] = [9] * tempo_atual
                 espera = tempo_atual - processo['T_chegada']
 
                 for c in range(espera):
-                    grafico.append(0)
+                    graficogeral[processo['Id']].append(0)
                     
                 for c in range(processo['T_exec']):
-                    grafico.append(1)
-                graficoauxiliar = grafico[:]
-                graficogeral.append(graficoauxiliar)
-                grafico.clear()
+                    graficogeral[processo['Id']].append(1)
+
             else:
                 espera = max(tempo_atual - processo['T_chegada'], 0)
                 for c in range(tempo_atual - espera):
-                    grafico.append(9)
+                    graficogeral[processo['Id']].append(9)
                 if espera == 0:
-                    grafico = [9] * tempo_atual
+                    graficogeral[processo['Id']] = [9] * tempo_atual
                 else:
                     for c in range(tempo_atual - processo['T_chegada']):
-                        grafico.append(0)
+                        graficogeral[processo['Id']].append(0)
                 for c in range(processo['T_exec']):
-                    grafico.append(1)
-                graficoauxiliar = grafico[:]
-                graficogeral.append(graficoauxiliar)
-                grafico.clear()
+                    graficogeral[processo['Id']].append(1)
             contador += 1
 
 
