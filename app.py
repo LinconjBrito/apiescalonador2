@@ -41,8 +41,7 @@ def sjf():
         contador = 0
         graficogeral = []
         for c in range(len(lista_processos)):
-            lista = []
-            graficogeral.append(lista)
+            graficogeral.append([])
 
         while processos_restantes:
             processos_disponiveis = []
