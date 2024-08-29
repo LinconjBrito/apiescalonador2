@@ -28,17 +28,18 @@ def fifo():
         "turnaround": turn_medio
     }
     
-    
-
-
 
 @app.route('/sjf/submit', methods=['POST'])
 def sjf():
+
         lista_processos = request.json[:-1]
         tempo_atual = turn_total = i = 0
         processos_restantes = sorted(lista_processos, key=lambda dicionario: (dicionario['T_chegada'], dicionario['T_exec']))
 
         lista_turnarounds = [0] * len(lista_processos)
+        
+        contador = 0
+        graficogeral = []
 
         while processos_restantes:
             processos_disponiveis = []
@@ -56,6 +57,36 @@ def sjf():
             processo = min(processos_disponiveis, key=lambda dicionario: dicionario['T_exec'])
             processos_restantes.remove(processo)
             
+            
+            if contador == 0:
+                grafico = [9] * tempo_atual
+                espera = tempo_atual - processo['T_chegada']
+
+                for c in range(espera):
+                    grafico.append(0)
+                    
+                for c in range(processo['T_exec']):
+                    grafico.append(1)
+                graficoauxiliar = grafico[:]
+                graficogeral.append(graficoauxiliar)
+                grafico.clear()
+            else:
+                espera = max(tempo_atual - processo['T_chegada'], 0)
+                for c in range(tempo_atual - espera):
+                    grafico.append(9)
+                if espera == 0:
+                    grafico = [9] * tempo_atual
+                else:
+                    for c in range(tempo_atual - processo['T_chegada']):
+                        grafico.append(0)
+                for c in range(processo['T_exec']):
+                    grafico.append(1)
+                graficoauxiliar = grafico[:]
+                graficogeral.append(graficoauxiliar)
+                grafico.clear()
+            contador += 1
+
+
             tempo_atual += processo['T_exec']
             processo['Termino'] = tempo_atual  # Atualizado para calcular o tempo de término
             processo['Turnaround'] = processo['Termino'] - processo['T_chegada']
@@ -65,11 +96,19 @@ def sjf():
         
         turn_medio = float(turn_total / len(lista_processos) * 10)/10.0
         maior = max(lista_turnarounds)
+        
+        maiorlista = max(graficogeral, key=len)
+        for c in graficogeral:
+            for k in range(len(maiorlista) - len(c)):
+                c.append(9)
+        
 
         return {
+            "grafico": graficogeral,
             "maior": maior,
             "turnaround": turn_medio
         }
+        
 
 @app.route('/edf/submit', methods=['POST'])
 def edf():
