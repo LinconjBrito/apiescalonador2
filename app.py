@@ -43,6 +43,7 @@ def fifo():
 
             for c in range(espera):
                 graficogeral[processo['Id']].append(0)
+                
 
             for c in range(processo['T_exec']):
                 graficogeral[processo['Id']].append(1)
@@ -80,11 +81,9 @@ def fifo():
         "grafico": graficogeral,
         "turnaround": turn_medio_formatado
     }
+    
+    
 
-    
-    
-    
- 
 
 @app.route('/sjf/submit', methods=['POST'])
 def sjf():
@@ -206,6 +205,11 @@ def edf():
     for i in range(qtd_processos):
         linha = []
         grafico.append(linha) 
+    
+    if tempo_edf != 0:
+        for i in range(qtd_processos):
+            for s in range(tempo_edf):
+                grafico[i].append(9)
 
     def verificaFila():
         for x in range(0,qtd_processos):
@@ -368,6 +372,11 @@ def rr():
     for i in range(qtd_processos):
         linha = []
         grafico.append(linha)
+    
+    if tempo_rr != 0:
+        for i in range(qtd_processos):
+            for s in range(tempo_rr):
+                grafico[i].append(9)
 
     def verificaFila():
         global tempo_rr
