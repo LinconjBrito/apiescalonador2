@@ -4,30 +4,86 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 
+
+
+
 @app.route('/fifo/submit', methods=['POST'])
 def fifo():
     lista_processos = request.json[:-1]
-    # lista_processos = request.json
-    tempo_atual = turn_total = 0
-    lista_ordenada_tempo_chegada = sorted(lista_processos, key=lambda dicionario: dicionario["T_chegada"]) #Isso ordena os processos pelo tempo de chegada
-    lista_turnarounds = [0] * len(lista_ordenada_tempo_chegada)
-    for k, v in enumerate(lista_ordenada_tempo_chegada): #Acessar individualmente cada dicionario(processo) dentro da lista
-        if tempo_atual < v["T_chegada"]:
-            tempo_atual = v["T_chegada"]
-        tempo_atual += v['T_exec']
-        v['Termino'] = tempo_atual
-        v['Turnaround'] = v['Termino'] - v["T_chegada"]
-        lista_turnarounds[k] += v['Turnaround']
-        turn_total += v['Turnaround']
-    turn_medio = float(turn_total / len(lista_ordenada_tempo_chegada) * 10)/10.0
+    tempo_atual = turn_total = i = 0
+        # Ordenar apenas pelo tempo de chegada
+    processos_restantes = sorted(lista_processos, key=lambda dicionario: dicionario['T_chegada'])
+
+    lista_turnarounds = [0] * len(lista_processos)
+    contador = 0
+    graficogeral = []
+    for c in range(len(lista_processos)):
+        graficogeral.append([])
+
+    while processos_restantes:
+        processos_disponiveis = []
+        for k, v in enumerate(processos_restantes):
+            if v['T_chegada'] <= tempo_atual:
+                processos_disponiveis.append(v)
+
+        if not processos_disponiveis:
+            tempo_atual = processos_restantes[0]['T_chegada']
+            processos_disponiveis = []
+            for k, v in enumerate(processos_restantes):
+                if v['T_chegada'] <= tempo_atual:
+                    processos_disponiveis.append(v)
+
+        # Selecionar o processo que chegou primeiro
+        processo = processos_disponiveis[0]
+        processos_restantes.remove(processo)
+
+        if contador == 0:
+            graficogeral[processo['Id']] = [9] * tempo_atual
+            espera = tempo_atual - processo['T_chegada']
+
+            for c in range(espera):
+                graficogeral[processo['Id']].append(0)
+
+            for c in range(processo['T_exec']):
+                graficogeral[processo['Id']].append(1)
+
+        else:
+            espera = max(tempo_atual - processo['T_chegada'], 0)
+            for c in range(tempo_atual - espera):
+                graficogeral[processo['Id']].append(9)
+            if espera == 0:
+                graficogeral[processo['Id']] = [9] * tempo_atual
+            else:
+                for c in range(tempo_atual - processo['T_chegada']):
+                    graficogeral[processo['Id']].append(0)
+            for c in range(processo['T_exec']):
+                graficogeral[processo['Id']].append(1)
+        contador += 1
+
+        tempo_atual += processo['T_exec']
+        processo['Termino'] = tempo_atual  # Atualizado para calcular o tempo de término
+        processo['Turnaround'] = processo['Termino'] - processo['T_chegada']
+        lista_turnarounds[i] += processo['Turnaround']
+        i += 1
+        turn_total += processo['Turnaround']
+
+    turn_medio = float((turn_total / len(lista_processos)) * 10) / 10.0
     maior = max(lista_turnarounds)
 
-
+    maiorlista = max(graficogeral, key=len)
+    for c in graficogeral:
+        for k in range(len(maiorlista) - len(c)):
+            c.append(9)
+       
     return {
-        "maior": maior,
+        "grafico": graficogeral,
         "turnaround": turn_medio
     }
+
     
+    
+    
+ 
 
 @app.route('/sjf/submit', methods=['POST'])
 def sjf():
@@ -37,7 +93,6 @@ def sjf():
         processos_restantes = sorted(lista_processos, key=lambda dicionario: (dicionario['T_chegada'], dicionario['T_exec']))
 
         lista_turnarounds = [0] * len(lista_processos)
-        
         contador = 0
         graficogeral = []
         for c in range(len(lista_processos)):
@@ -91,7 +146,7 @@ def sjf():
             i += 1
             turn_total += processo['Turnaround']
         
-        turn_medio = float(turn_total / len(lista_processos) * 10)/10.0
+        turn_medio = float((turn_total / len(lista_processos)) * 10)/10.0
         maior = max(lista_turnarounds)
         
         maiorlista = max(graficogeral, key=len)
@@ -105,6 +160,7 @@ def sjf():
             "maior": maior,
             "turnaround": turn_medio
         }
+        
         
 
 @app.route('/edf/submit', methods=['POST'])
@@ -263,8 +319,12 @@ def edf():
             turnaround+=tempo_edf-lista_tempo_chegada[escolhido] 
 
     turn_medio = float(turnaround/qtd_processos)
-    turn_medio = float(turnaround/qtd_processos * 10) / 10.0
+    turn_medio = float((turnaround/qtd_processos) * 10) / 10.0
     maior = max(lista_de_turnarounds) 
+    maior_lista = max(grafico, key=len)
+    for c in grafico:
+        for k in range(len(maior_lista)-len(c)):
+            c.insert(0, 9)
     return {
         "grafico": grafico,
         "maior": maior,
@@ -402,7 +462,12 @@ def rr():
             verificaFila()
 
     maior = max(lista_de_turnarounds)
-    turn_medio = float(turnaround/qtd_processos * 10) / 10.0
+    turn_medio = float((turnaround/qtd_processos) * 10) / 10.0
+    maior_lista = max(grafico, key=len)
+    for c in grafico:
+        for k in range(len(maior_lista)-len(c)):
+            c.insert(0, 9)
+    
 
     return {
         "grafico": grafico,
