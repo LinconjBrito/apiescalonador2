@@ -70,7 +70,6 @@ def fifo():
 
     turn_medio = float(turn_total / len(lista_processos))
     turn_medio_formatado = "{:.2f}".format(turn_medio) 
-    maior = max(lista_turnarounds)
 
     maiorlista = max(graficogeral, key=len)
     for c in graficogeral:
@@ -242,14 +241,22 @@ def edf():
             tempo_cpu[escolhido] += quantum
             for x in range(0,qtd_processos):
                 if lista_tempo_chegada[x] <= tempo_edf and tempo_cpu[x]<lista_tempo_execucao[x]:
-                    lista_deadlines[x] = lista_parametros_deadlines[x] - tempo_edf
+                    lista_deadlines[x] = lista_parametros_deadlines[x] - (tempo_edf - lista_tempo_chegada[x])
             for p in range(qtd_processos):
                 if p == escolhido:
-                    for i in range(int(quantum)):
-                        if lista_deadlines[p] >= 0:
-                            grafico[p].append(1)
+                    if lista_deadlines[p] >= 0:
+                        for i in range(int(quantum)):
+                            if lista_deadlines[p] >= 0:
+                                grafico[p].append(1)
+                    else:
+                        if lista_deadlines[p] + quantum > 0:
+                            for i in range((int(lista_deadlines[p])+int(quantum))):
+                                grafico[p].append(1)   
+                            for i in range((int(quantum)-(int(lista_deadlines[p])+int(quantum)))):
+                                grafico[p].append(8)
                         else:
-                            grafico[p].append(8)
+                            for i in range(int(quantum)):
+                                grafico[p].append(8)
                 else:
                     if lista_tempo_chegada[p] < tempo_edf and tempo_cpu[p]!=lista_tempo_execucao[p]:
                         if (tempo_edf - lista_tempo_chegada[p]) == tempo_edf and grafico[p] == []:
@@ -276,7 +283,7 @@ def edf():
             tempo_edf+=sobrecarga
             for x in range(0,qtd_processos): 
                 if lista_tempo_chegada[x] <= tempo_edf and tempo_cpu[x]<lista_tempo_execucao[x]: 
-                    lista_deadlines[x] = lista_parametros_deadlines[x] - tempo_edf 
+                    lista_deadlines[x] = lista_parametros_deadlines[x] - (tempo_edf - lista_tempo_chegada[x])  
             for p in range(qtd_processos):
                 if p == escolhido:
                     for i in range(int(sobrecarga)):
@@ -296,15 +303,21 @@ def edf():
             tempo_edf+= resta_executar
             for x in range(0,qtd_processos): 
                 if lista_tempo_chegada[x] <= tempo_edf and tempo_cpu[x]<lista_tempo_execucao[x]:
-                    lista_deadlines[x] = lista_parametros_deadlines[x] - tempo_edf
+                    lista_deadlines[x] = lista_parametros_deadlines[x] - (tempo_edf - lista_tempo_chegada[x]) 
             for p in range(qtd_processos):
                 if p == escolhido:
                     if lista_deadlines[p] >= 0:
                         for i in range(int(resta_executar)):
                             grafico[p].append(1)
                     else:
-                        for i in range(int(resta_executar)):
-                            grafico[p].append(8)
+                        if int(lista_deadlines[p]) + int(resta_executar) > 0:
+                            for i in range((int(lista_deadlines[p])+int(resta_executar))):
+                                grafico[p].append(1)   
+                            for i in range((int(resta_executar)-(int(lista_deadlines[p])+int(resta_executar)))):
+                                grafico[p].append(8)
+                        else:
+                            for i in range(int(resta_executar)):
+                                grafico[p].append(8)
                 else:
                     if lista_tempo_chegada[p]< tempo_edf and tempo_cpu[p]!=lista_tempo_execucao[p]:
                         for i in range(int(resta_executar)):
@@ -333,6 +346,7 @@ def edf():
         "grafico": grafico,
         "turnaround": turn_medio_formatado
     }
+    
 
 
 
@@ -485,3 +499,4 @@ def rr():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
+
