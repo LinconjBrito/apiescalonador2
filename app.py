@@ -67,7 +67,8 @@ def fifo():
         i += 1
         turn_total += processo['Turnaround']
 
-    turn_medio = float((turn_total / len(lista_processos)) * 10) / 10.0
+    turn_medio = float(turn_total / len(lista_processos))
+    turn_medio_formatado = "{:.2f}".format(turn_medio) 
     maior = max(lista_turnarounds)
 
     maiorlista = max(graficogeral, key=len)
@@ -77,7 +78,7 @@ def fifo():
        
     return {
         "grafico": graficogeral,
-        "turnaround": turn_medio
+        "turnaround": turn_medio_formatado
     }
 
     
@@ -146,7 +147,8 @@ def sjf():
             i += 1
             turn_total += processo['Turnaround']
         
-        turn_medio = float((turn_total / len(lista_processos)) * 10)/10.0
+        turn_medio = float(turn_total / len(lista_processos)) 
+        turn_medio_formatado = "{:.2f}".format(turn_medio) 
         maior = max(lista_turnarounds)
         
         maiorlista = max(graficogeral, key=len)
@@ -157,8 +159,7 @@ def sjf():
 
         return {
             "grafico": graficogeral,
-            "maior": maior,
-            "turnaround": turn_medio
+            "turnaround": turn_medio_formatado
         }
         
         
@@ -319,16 +320,14 @@ def edf():
             turnaround+=tempo_edf-lista_tempo_chegada[escolhido] 
 
     turn_medio = float(turnaround/qtd_processos)
-    turn_medio = float((turnaround/qtd_processos) * 10) / 10.0
-    maior = max(lista_de_turnarounds) 
+    turn_medio_formatado = "{:.2f}".format(turn_medio) 
     maior_lista = max(grafico, key=len)
     for c in grafico:
         for k in range(len(maior_lista)-len(c)):
             c.insert(0, 9)
     return {
         "grafico": grafico,
-        "maior": maior,
-        "turnaround": turn_medio
+        "turnaround": turn_medio_formatado
     }
 
 
@@ -462,7 +461,8 @@ def rr():
             verificaFila()
 
     maior = max(lista_de_turnarounds)
-    turn_medio = float((turnaround/qtd_processos) * 10) / 10.0
+    turn_medio = float(turnaround/qtd_processos)
+    turn_medio_formatado = "{:.2f}".format(turn_medio) 
     maior_lista = max(grafico, key=len)
     for c in grafico:
         for k in range(len(maior_lista)-len(c)):
@@ -471,8 +471,7 @@ def rr():
 
     return {
         "grafico": grafico,
-        "maior": maior,
-        "turnaround": turn_medio
+        "turnaround": turn_medio_formatado
     }
 
 if __name__ == '__main__':
