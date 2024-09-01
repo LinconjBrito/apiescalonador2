@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 
 
 
@@ -88,10 +90,9 @@ def fifo():
 def sjf():
 
         lista_processos = request.json[:-1]
-        tempo_atual = turn_total = i = 0
+        tempo_atual = turn_total = 0
         processos_restantes = sorted(lista_processos, key=lambda dicionario: (dicionario['T_chegada'], dicionario['T_exec']))
 
-        lista_turnarounds = [0] * len(lista_processos)
         contador = 0
         graficogeral = []
         for c in range(len(lista_processos)):
@@ -141,24 +142,24 @@ def sjf():
             tempo_atual += processo['T_exec']
             processo['Termino'] = tempo_atual  # Atualizado para calcular o tempo de término
             processo['Turnaround'] = processo['Termino'] - processo['T_chegada']
-            lista_turnarounds[i] += processo['Turnaround']
-            i += 1
             turn_total += processo['Turnaround']
         
         turn_medio = float(turn_total / len(lista_processos)) 
         turn_medio_formatado = "{:.2f}".format(turn_medio) 
-        maior = max(lista_turnarounds)
         
         maiorlista = max(graficogeral, key=len)
         for c in graficogeral:
             for k in range(len(maiorlista) - len(c)):
                 c.append(9)
-        
-
         return {
             "grafico": graficogeral,
             "turnaround": turn_medio_formatado
         }
+        
+        
+        
+        
+        
         
         
 
@@ -347,7 +348,8 @@ def edf():
         "turnaround": turn_medio_formatado
     }
     
-
+    
+    
 
 
 @app.route('/rr/submit', methods=['POST'])
